@@ -106,7 +106,7 @@ def process_buffer():
 
     latest_row = df.iloc[-1:]
 
-    signal, prob = generate_signals(latest_row, model)
+    signal, prob = generate_signals(latest_row, model, p_buy=0.60, p_sell=0.40, adx_min=20.0)
 
     prob = prob[0]
     signal = signal[0]
@@ -116,7 +116,25 @@ def process_buffer():
     atr_mean = df["atr"].rolling(50).mean().iloc[-1]
     atr = latest_row["atr"].values[0]
 
-    signal_filtered = apply_risk_filter(signal, confidence, atr, atr_mean)
+    # Expected R:R from strategy SL/TP profile (1.2 / 0.8 = 1.5).
+    expected_rr = 1.5
+    stop_loss = atr * 0.8
+    take_profit = atr * 1.2
+    win_prob = prob if signal == 1 else (1 - prob)
+    expected_gross_edge = (win_prob * take_profit) - ((1 - win_prob) * stop_loss)
+    fee_rate = 0.0006
+    slippage_rate = 0.0004
+    expected_cost_edge = (latest_row["close"].values[0] * 2) * (fee_rate + slippage_rate)
+    expected_net_edge = expected_gross_edge - expected_cost_edge
+    signal_filtered = apply_risk_filter(
+        signal,
+        confidence,
+        atr,
+        atr_mean,
+        expected_rr=expected_rr,
+        expected_net_edge=expected_net_edge,
+        min_rr=1.5,
+    )
 
     # IMPORTANT: use iloc[0] + isoformat() to preserve Lagos timezone properly
     ts = latest_row["timestamp"].iloc[0]

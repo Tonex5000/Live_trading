@@ -2,13 +2,14 @@ import pandas as pd
 from xgboost import XGBClassifier
 import joblib
 from sklearn.model_selection import TimeSeriesSplit
-from features import add_features
+from src.features import add_indicators
 
 # Load & preprocess
 df = pd.read_csv("data/processed/BTCUSDT_features.csv")
-df = add_features(df)
+df = add_indicators(df)
+df = df.dropna().reset_index(drop=True)
 
-features = ["rsi","ema_20","ema_50","ema_200","atr","trend","strong_trend"]
+features = ["rsi", "ema_20", "ema_50", "ema_200", "atr", "adx", "trend", "strong_trend"]
 X = df[features]
 y = df["target"]
 
@@ -24,7 +25,7 @@ model = XGBClassifier(
     max_depth=5,
     learning_rate=0.05,
     subsample=0.8,
-    random_state=42
+    random_state=42,
 )
 model.fit(X_train, y_train)
 
