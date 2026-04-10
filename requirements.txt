@@ -7,3 +7,8 @@ xgboost
 matplotlib
 seaborn
 joblib
+fastapi
+uvicorn
+sqlmodel
+python-dotenv
+pytest

@@ -1,0 +1,62 @@
+runtime:
+  mode: paper
+  symbols: ["BTC/USDT:USDT"]
+  timeframe: "30m"
+  poll_interval: 30
+  max_buffer: 300
+
+data:
+  exchange_id: bybit
+  enable_rate_limit: true
+  timeout_ms: 30000
+  default_type: swap
+  adjust_for_time_difference: true
+
+strategy:
+  model_path: models/xgb_signal_model.pkl
+  calibrator_path: models/prob_calibrator.pkl
+  calibration_method: platt
+  thresholds_mode: fixed
+  thresholds_path: models/optimized_thresholds.json
+  p_buy: 0.60
+  p_sell: 0.40
+  adx_min: 20.0
+  allow_legacy_feature_fallback: false
+
+risk:
+  max_risk_per_trade: 0.01
+  max_concurrent_positions: 1
+  cooldown_minutes: 30
+  min_confidence: 0.30
+  confidence_risk_floor: 0.50
+  confidence_risk_ceiling: 1.00
+  min_expected_value: 0.0
+  atr_stop_mult: 0.8
+  atr_tp_mult: 1.2
+  min_rr: 1.5
+  max_atr_vol_mult: 1.8
+  atr_risk_cut_mult: 1.3
+  atr_risk_multiplier: 0.7
+  min_qty: 0.001
+  min_notional: 5.0
+  qty_precision: 6
+  price_precision: 2
+  stale_signal_minutes: 120
+  drawdown_threshold: 0.05
+  drawdown_risk_multiplier: 0.5
+  max_total_risk_exposure: 0.03
+
+execution:
+  fee_rate: 0.0006
+  slippage_rate: 0.0004
+
+monitoring:
+  feature_drift_threshold: 2.0
+  signal_drift_threshold: 2.0
+  execution_drift_threshold: 0.01
+  performance_window_trades: 200
+
+governance:
+  model_selection_mode: champion_only
+  champion_model_version: default
+  challenger_model_version: ""
